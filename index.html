@@ -2,8 +2,8 @@
 <html><head>
     <meta http-equiv="content-type" content="text/html; charset=ISO-8859-1"/>
     <link rel="icon" href="resources\prepbytes.ico">
+    <link rel="stylesheet" href="index.css" />
     <title>Backtracking</title>
-    <link rel="stylesheet" href="backtracking files/style.css"/>
     </head><body bgcolor="#ffffff">
         <b><font size="+3">Backtracking</font></b></br>
         Copyright &#169;2002 by David Matuszek
@@ -61,7 +61,89 @@
       }
   }</pre>
   </blockquote>
-  
+  <p>Notice that the algorithm is expressed as a <i>boolean</i> function. This is 
+    essential to understanding the algorithm. If <code>solve(n)</code> is true, 
+    that means node<code> n </code>is part of a solution--that is, node<code> n 
+    </code>is one of the nodes on a path from the root to some goal node. We say 
+    that<code> n </code>is <i>solvable</i>. If<code> solve(n) </code>is false, then 
+    there is <i>no</i> path that includes<code> n</code> to any goal node.</p>
+  <p>How does this work?</p>
+  <ul>
+    <li>If any child of<code> n </code>is solvable, then<code> n </code>is solvable.</li>
+    <li>If no child of<code> n </code>is solvable, then<code> n </code>is not solvable.</li>
+  </ul>
+  <p>Hence, to decide whether any non-leaf node<code> n </code>is solvable (part 
+    of a path to a goal node), all you have to do is test whether any child of<code> 
+    n </code>is solvable. This is done recursively, on each child of<code> n</code>. 
+    In the above code, this is done by the lines</p>
+  <pre>        for each child c of n {
+              if solve(c) succeeds, return true
+          }
+          return false</pre>
+    <p>Eventually the recursion will "bottom" out at a leaf node. If the leaf
+       node is a goal node, it is solvable; if the leaf node is not a goal node, 
+            it is not solvable. This is our base case. In the above code, this is done by 
+            the lines</p>
+          <blockquote><pre>if n is a leaf node {
+              if the leaf is a goal node, return true
+              else return false
+          }</pre></blockquote>
+          <p>The backtracking algorithm is simple but important. You should understand it 
+            thoroughly. Another way of stating it is as follows:</p>
+<dir>
+  <li>    To search a tree:  
+  <ol>
+    <li>  If the tree consists of a single leaf, test whether it is a goal node,  </li>
+    <li>  Otherwise, search the subtrees until you find one containing a goal 
+      node, or until you have searched them all unsuccessfully.  </li>
+  </ol>
+  </li>
+</dir>
+<p><b><font size="+1">Non-recursive backtracking, using a stack </font></b></p>
+<p>Backtracking is a rather typical recursive algorithm, and any recursive algorithm 
+  can be rewritten as a stack algorithm. In fact, that is how your recursive algorithms 
+  are translated into machine or assembly language.</p>
+<blockquote>
+  <pre>boolean solve(Node n) {
+    put node n on the stack;
+    while the stack is not empty {
+        if the node at the top of the stack is a leaf {
+            if it is a goal node, return true
+            else pop it off the stack
+        }
+        else {
+            if the node at the top of the stack has untried children
+                push the next untried child onto the stack
+            else pop the node off the stack
+
+    }
+    return false
+  }</pre>
+</blockquote>
+<p>Starting from the root, the only nodes that can be pushed onto the stack are 
+  the children of the node currently on the top of the stack, and these are only 
+  pushed on one child at a time; hence, the nodes on the stack at all times describe 
+  a valid path in the tree. Nodes are removed from the stack only when it is known 
+  that they have no goal nodes among their descendents. Therefore, if the root 
+  node gets removed (making the stack empty), there must have been no goal nodes 
+  at all, and no solution to the problem.</p>
+<p>When the stack algorithm terminates successfully, the nodes on the stack form 
+  (in reverse order) a path from the root to a goal node.</p>
+<p>Similarly, when the recursive algorithm finds a goal node, the path information 
+  is embodied (in reverse order) in the sequence of recursive calls. Thus as the 
+  recursion unwinds, the path can be recovered one node at a time, by (for instance) 
+  printing the node at the current level, or storing it in an array.</p>
+<p>Here is the recursive backtracking algorithm, modified slightly to print (in 
+  reverse order) the nodes along the successful path:</p>
+
+
+
+
+
+
+
+
+
 
 
 
