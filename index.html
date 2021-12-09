@@ -711,29 +711,46 @@ it can never be <code>true</code>, and the controlled code will be discarded.
   <p>With these methods, our central backtracking method can be written as follows:</p>
   <blockquote>
     <pre>boolean solvable(int[] board) {
-      if (puzzleSolved(board)) {
-          return true;
-      }
-      for (int position = 0; position &lt; BOARD_SIZE; position++) {
-          if (canMove(board, position)) {
-              int[] newBoard = makeMove(board, position);
-              if (solvable(newBoard)) {
-                  printBoard(newBoard);
-                  return true;
-              }
-          }
-      }
-      return false;
-  }</pre>
+    if (puzzleSolved(board)) {
+        return true;
+    }
+    for (int position = 0; position &lt; BOARD_SIZE; position++) {
+        if (canMove(board, position)) {
+            int[] newBoard = makeMove(board, position);
+            if (solvable(newBoard)) {
+                printBoard(newBoard);
+                return true;
+            }
+        }
+    }
+    return false;
+}</pre>
   </blockquote>
   <p>Along with <code>canMove</code> and <code>makeMove</code>, we are using methods 
     <code>puzzleSolved</code> and <code>printBoard</code> with meanings that should 
     be obvious.</p>
   <p>Here is some output from the program:</p>
-
-
-
-
-
-    </body></html>
+  <pre><i><font color="#0000ff">16.</font>  </i><b><font color="#000000">WHITE  WHITE  WHITE  _____  BLACK  BLACK  BLACK</font></b>
+<i><font color="#0000ff">15.</font></i>  <b><font color="#000000">WHITE  WHITE  WHITE  BLACK  _____  BLACK  BLACK</font></b>
+<i><font color="#0000ff">14.</font></i>  <b><font color="#000000">WHITE  WHITE  _____  BLACK  WHITE  BLACK  BLACK</font></b>
+<i><font color="#0000ff">13.</font></i>  <b><font color="#000000">WHITE  _____  WHITE  BLACK  WHITE  BLACK  BLACK</font></b>
+<i><font color="#0000ff">12.</font></i>  <b><font color="#000000">WHITE  BLACK  WHITE  _____  WHITE  BLACK  BLACK</font></b>
+<i><font color="#0000ff">11. </font></i> <b><font color="#000000">WHITE  BLACK  WHITE  BLACK  WHITE  _____  BLACK</font></b>
+<i><font color="#0000ff">10.</font></i> <b><font color="#000000">WHITE  BLACK  WHITE  BLACK  WHITE  BLACK  _____</font></b>
+<i><font color="#0000ff"> 9. </font></i> <b><font color="#000000">WHITE  BLACK  WHITE  BLACK  _____  BLACK  WHITE</font></b>
+<i><font color="#0000ff"> 8. </font></i> <b><font color="#000000">WHITE  BLACK  _____  BLACK  WHITE  BLACK  WHITE</font></b>
+<i><font color="#0000ff"> 7. </font></i> <b><font color="#000000">_____  BLACK  WHITE  BLACK  WHITE  BLACK  WHITE</font></b>
+<i><font color="#0000ff"> 6. </font></i> <b><font color="#000000">BLACK  _____  WHITE  BLACK  WHITE  BLACK  WHITE</font></b>
+<i><font color="#0000ff"> 5. </font></i> <b><font color="#000000">BLACK  BLACK  WHITE  _____  WHITE  BLACK  WHITE</font></b>
+<i><font color="#0000ff"> 4. </font></i> <b><font color="#000000">BLACK  BLACK  WHITE  BLACK  WHITE  _____  WHITE</font></b>
+<i><font color="#0000ff"> 3. </font></i> <b><font color="#000000">BLACK  BLACK  WHITE  BLACK  _____  WHITE  WHITE</font></b>
+<i><font color="#0000ff"> 2.</font></i>  <b><font color="#000000">BLACK  BLACK  _____  BLACK  WHITE  WHITE  WHITE</font></b>
+<i><font color="#0000ff"> 1. </font></i> <b><font color="#000000">BLACK  BLACK  BLACK  _____  WHITE  WHITE  WHITE</font></b>
+</pre>
+<p>Notice that the solution is given in reverse order: BLACK starts out on the 
+  left and WHITE on the right, as in the last line. I've added line numbers to 
+  the actual output in order to emphasize this point. Backtracking always produces 
+  its results (sequence of choices) in reverse order; it is up to you, the programmer, 
+  to reverse the results again to get them in the correct order.</p>
+</body></html>
     
