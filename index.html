@@ -296,16 +296,272 @@
   efficient. </p>
   <p><b><font size="+1"><br />
     What are the children?</font></b></p>
+    <p>One of the things that simplifies the above binary tree search is that, at 
+      each choice point, you can ignore all the previous choices. Previous choices 
+      don't give you any information about what you should do next; as far as you 
+      know, both the left and the right child are possible solutions. In many problems, 
+      however, you may be able to eliminate children immediately, without recursion.</p>
+    <p>Consider, for example, the problem of four-coloring a map. It is a theorem 
+      of mathematics that any map on a plane, no matter how convoluted the countries 
+      are, can be colored with at most four colors, so that no two countries that 
+      share a border are the same color.</p>
+    <p>To color a map, you choose a color for the first country, then a color for 
+      the second country, and so on, until all countries are colored. There are two 
+      ways to do this:</p>
+    <ul>
+      <li><b>Method 1. </b>Try each of the four possible colors, and recur. When you 
+        run out of countries, check whether you are at a goal node.</li>
+      <li><b>Method 2. </b>Try only those colors that have not already been used for 
+        an adjacent country, and recur. If and when you run out of countries, you 
+        have successfully colored the map.</li>
+    </ul>
+    <p>Let's apply each of these two methods to the problem of coloring a checkerboard. 
+      This should be easily solvable; after all, a checkerboard only needs two colors.</p>
+    <p>In both methods, the colors are represented by integers, from<code> RED=1 </code>to<code> 
+      BLUE=4</code>. We define the following helper methods. The helper method code 
+      isn't displayed here because it's not important for understanding the method 
+      that does the backtracking.</p>
+    <dl> 
+      <dt><code>boolean mapIsOK()</code></dt>
+      <dd>Used by method 1 to check (at a leaf node) whether the entire map is colored 
+        correctly.
+        <br /><br />
+      </dd>
+      <dt><code>boolean okToColor(int row, int column, int color)</code></dt>
+      <dd>Used by method 2 to check, at every node, whether there is an adjacent node 
+        already colored with the given color.
+        <br /><br />
+      </dd>
+      <dt><code>int[] nextRowAndColumn(int row, int column)</code></dt>
+      <dd>Used by both methods to find the next "country" (actually, the 
+        row and column of the next square on the checkerboard).</dd>
+    </dl>
+    <p>Here's the code for method 1:</p>
+    <blockquote>
+      <pre>boolean explore1(int row, int column, int color) {
+        if (row &gt;= NUM_ROWS) <b>return mapIsOK()</b>;
+        map[row][column] = color;
+        for (int nextColor = RED; nextColor &lt;= BLUE; nextColor++) {
+            int[] next = nextRowAndColumn(row, column);
+            if (explore1(next[0], next[1], nextColor)) return true;
+        }
+        return false;
+    }</pre>
+    </blockquote>
+    <p>And here's the code for method 2:</p>
+    <blockquote>
+      <pre>boolean explore2(int row, int column, int color) {
+        if (row &gt;= NUM_ROWS) <b>return true</b>;
+        <b>if (okToColor(row, column, color)) {</b>
+            map[row][column] = color;
+            for (int nextColor = RED; nextColor &lt;= BLUE; nextColor++) {
+                int[] next = nextRowAndColumn(row, column);
+                if (explore2(next[0], next[1], nextColor)) return true;
+            }
+        }
+        return false;
+    }</pre>
+    </blockquote>
+    <p>Those appear pretty similar, and you might think they are equally good. However, 
+      the timing information suggests otherwise:</p>
+<table align="center" border="1" cellpadding="4">
+  <tbody><tr bgcolor="#cccccc"> 
+    <td bgcolor="#ffffff">&nbsp;</td>
+    <td>2 by 3 map</td>
+    <td>3 by 3 map</td>
+    <td>3 by 4 map</td>
+  </tr>
+  <tr>
+    <td bgcolor="#cccccc">Method 1:</td>
+    <td>60 ms.</td>
+    <td>940 ms.</td>
+    <td>60530 ms. (1 minute)</td>
+  </tr>
+  <tr>
+    <td bgcolor="#cccccc">Method 2:</td>
+    <td>0ms.</td>
+    <td>0 ms.</td>
+    <td>0 ms</td>
+  </tr>
+</tbody></table>    
+<p>The zeros in the above table indicate times too short to measure (less than 
+  1 millisecond). Why this huge difference? Either of these methods <i>could</i> 
+  have exponential growth. Eliminating a node automatically eliminates all of 
+  its descendents, and this will often prevent exponential growth. Conversely, 
+  by waiting to check until a leaf node is reached, exponential growth is practically 
+  guaranteed. <i> <b>If there is any way to eliminate children (reduce the set 
+  of choices), do so!</b></i></p>
+<p><font size="+1"><b><br />
+  Debugging techniques</b></font></p>
+<p> Often our first try at a program doesn't work, and we need to debug it. Debuggers 
+  are helpful, but sometimes we need to fall back on inserting print statements. 
+  There are some simple tricks to making effective use of print statements. These 
+  tricks can be applied to any program, but are especially useful when you are 
+  trying to debug recursive routines.</p>
+<p><b>Trick #1: Indent when you print method entries and exits. </b>Often, the 
+  best debugging technique is to print every method call and return (or at least 
+  the most important ones). You probably want to print, for each method, what 
+  parameters it came in with, and what value it leaves with. However, if you just 
+  print a long list of these, it's hard to match up method exits with their corresponding 
+  entries. Indenting to show the level of nesting can help.</p>
+<p><b>Trick #2: Use specialized print methods for debugging. </b>Don't clutter 
+  up your actual code more than you must. Also, remember that code inserted for 
+  debugging purposes can itself contain bugs, or (in the worst case) can affect 
+  the results, so be very careful with it.</p>
+<p>Here's our debugging code. For this trivial program, there's almost more debugging 
+  code than actual code, but in larger programs the proportions will be better.</p>
+<blockquote>
+  <pre><pre>static String indent = "";
 
+static String name(BinaryTree node) {
+    if (node == null) return null;
+    else return node.name;
+}
+    
+static void enter(BinaryTree node) {
+    System.out.println(indent + "Entering solvable(" + name(node) + ")");
+    indent = indent + "|  ";
+}
+    
+static boolean yes(BinaryTree node) {
+    indent = indent.substring(3);
+    System.out.println(indent + "solvable(" + name(node) + ") returns true");
+    return true;
+}
+    
+static boolean no(BinaryTree node) {
+    indent = indent.substring(3);
+    System.out.println(indent + "solvable(" + name(node) + ") returns false");
+    return false;
+}</pre>
+</blockquote>
+<p>To use this code, we modify solvable as follows:</p>
+<blockquote>
+  <pre>static boolean solvable(BinaryTree node) {
+    <b>enter(node)</b>;
+    if (node == null) return <b>no(node)</b>;
+    if (node.isGoalNode) return <b>yes(node)</b>;
+    if (solvable(node.leftChild)) return <b>yes(node)</b>;
+    if (solvable(node.rightChild)) return <b>yes(node)</b>;
+    return <b>no(node)</b>;
+}</pre>
+</blockquote>
+<p>And we get these results:</p>
+<blockquote>
+  <pre><font color="#000000"><b>Entering solvable(Root)
+|  Entering solvable(A)
+|  |  Entering solvable(C)
+|  |  |  Entering solvable(null)
+|  |  |  solvable(null) returns false
+|  |  |  Entering solvable(null)
+|  |  |  solvable(null) returns false
+|  |  solvable(C) returns false
+|  |  Entering solvable(D)
+|  |  |  Entering solvable(null)
+|  |  |  solvable(null) returns false
+|  |  |  Entering solvable(null)
+|  |  |  solvable(null) returns false
+|  |  solvable(D) returns false
+|  solvable(A) returns false
+|  Entering solvable(B)
+|  |  Entering solvable(E)
+|  |  solvable(E) returns true
+|  solvable(B) returns true
+solvable(Root) returns true
+true</b></font></pre>
+</blockquote>
+<p><b>Trick #3: Never discard your debugging statements. </b>Writing debugging 
+  statements is programming, too. Often it's as much work to debug the debugging 
+  statements as it is to debug the actual program. Once your program is working, 
+  why throw this code away?</p>
+<p>Obviously, you don't want to print out all this debugging information from 
+  a program you are ready to submit (or to turn over to your manager). You could 
+  comment out your debugging calls, but that can be a lot of work. What's more, 
+  in the above example, you would have to replace every <code>return(yes(node)) 
+  </code>with<code> return(true)</code>, and every<code> return(no(node))</code> 
+  with<code> return false</code>. With all these changes, you might introduce 
+  new bugs into your program.</p>
+<p>The simple solution is to make your debugging statements <i>conditional.</i> 
+  For example,</p>
+<blockquote>
+  <pre><b>static final boolean debugging = false;</b>
 
-
-
-
-
-
-
-
-
+static void enter(BinaryTree node) {
+    <b>if (debugging) {</b>
+        System.out.println(indent + "Entering solvable(" + name(node) + ")");
+        indent = indent + "|  ";
+    <b>}</b>
+}
+    
+static boolean yes(BinaryTree node) {
+    <b>if (debugging) {</b>
+        indent = indent.substring(3);
+        System.out.println(indent + "solvable(" + name(node) + ") returns true");
+    <b>}</b>
+    return true;
+}
+    
+static boolean no(BinaryTree node) {
+   <b> if (debugging) {</b>
+        indent = indent.substring(3);
+        System.out.println(indent + "solvable(" + name(node) + ") returns false");
+    <b>}</b>
+    return false;
+}</pre>
+</blockquote>
+In industry, actual programs often have multiple flags to control different aspects 
+of debugging. Don't worry too much about making your code larger; modern compilers 
+will notice that since the variable <code>debugging</code> is <code>final</code>, 
+it can never be <code>true</code>, and the controlled code will be discarded. 
+<p><b>Trick #4: Create an Exception. </b>If an Exception is thrown, you can get 
+  information about just where it happened by sending it the message<code> printStackTrace(PrintStream)</code>. 
+  Since an Exception is an object like any other, you can create and <code>throw</code> 
+  your own Exceptions. However, Java programmers don't always realize that you 
+  can create an Exception <i>without</i> throwing it. For example, the following 
+  code</p>
+<blockquote>
+  <pre>new Exception("Checkpoint Charlie").printStackTrace(System.out);</pre>
+</blockquote>
+<p>will print out a message something like this, and the program will then continue 
+  normally. That is, the above code just acts like a print statement.</p>
+<blockquote>
+  <pre>java.lang.Exception: Checkpoint Charlie
+        at TreeSearch.solvable(TreeSearch.java:53)
+        at TreeSearch.solvable(TreeSearch.java:57)
+        at TreeSearch.main(TreeSearch.java:72)
+        at __SHELL38.run(__SHELL38.java:16)
+        at bluej.runtime.ExecServer.suspendExecution(Unknown Source)
+</pre>
+</blockquote>
+<p><b><font size="+1"><br />
+  Example: Cindy's Puzzle</font></b></p>
+<p>I call the following puzzle "Cindy's puzzle" for historical reasons. 
+  You have some number<code> n </code>of black marbles and the same number of 
+  white marbles, and you have a playing board which consists simply of a line 
+  of<code> 2n+1 </code>spaces to put the marbles in. Start with the black marbles 
+  all at one end (say, the left), the white marbles all at the other end, and 
+  a free space in between.</p>
+  <table align="center" bgcolor="#dddddd" border="1" cellpadding="6" cellspacing="0">
+    <tbody><tr>
+      <td width="44"><img src="backtracking_files/black-ball.gif" height="44" width="44" /></td>
+      <td width="44"><img src="backtracking_files/black-ball.gif" height="44" width="44" /></td>
+      <td width="44">&nbsp;</td>
+      <td width="44"><img src="backtracking_files/white-ball.gif" height="44" width="44" /></td>
+      <td width="44"><img src="backtracking_files/white-ball.gif" height="44" width="44" /></td>
+    </tr>
+  </tbody></table>
+  <p>The goal is to reverse the positions of the marbles:</p>
+  <table align="center" bgcolor="#dddddd" border="1" cellpadding="6" cellspacing="0">
+    <tbody><tr> 
+      <td width="44"><img src="backtracking_files/white-ball.gif" height="44" width="44" /></td>
+      <td width="44"><img src="backtracking_files/white-ball.gif" height="44" width="44" /></td>
+      <td width="44">&nbsp;</td>
+      <td width="44"><img src="backtracking_files/black-ball.gif" height="44" width="44" /></td>
+      <td width="44"><img src="backtracking_files/black-ball.gif" height="44" width="44" /></td>
+    </tr>
+  </tbody></table>
+  <p>The black marbles can only move to the right, and the white marbles can only 
+    move to the left (no backing up). At each move, a marble can either:</p>
 
 
     </body></html>
